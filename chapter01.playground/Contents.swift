@@ -80,3 +80,42 @@ pipelineDescriptor.vertexDescriptor = MTKMetalVertexDescriptorFromModelIO(
 let pipelineState = try device.makeRenderPipelineState(
     descriptor: pipelineDescriptor)
 
+// 通过 "," 符号来简写，将多个定义和合并到一个 guard 语句中
+// 定义 commandbuffer
+guard let commandBuffer = commandQueue.makeCommandBuffer(),
+    // 定义 renderpass descriptor，需要通过 mtkview 对象
+    let renderPassDescriptor = view.currentRenderPassDescriptor,
+    // 定义 commandbuffer 的 renderer encoder，用于记录渲染命令
+    let renderEncoder = commandBuffer.makeRenderCommandEncoder(
+        descriptor: renderPassDescriptor)
+else { fatalError("error") }
+
+// 记录渲染命令前需要设置 pso
+renderEncoder.setRenderPipelineState(pipelineState)
+
+// 设置 vertex buffer
+renderEncoder.setVertexBuffer(mesh.vertexBuffers[0].buffer, offset: 0, index: 0)
+
+// 绘制命令需要顶点索引的数量与类型，这些信息通过 mesh 的 submesh 来提供
+guard let submesh = mesh.submeshes.first else {
+    fatalError("submesh error")
+}
+
+// 向 render encoder 里记录一条绘制命令，同时记录绘制参数
+renderEncoder.drawIndexedPrimitives(
+    type: .triangle, indexCount: submesh.indexCount,
+    indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer,
+    indexBufferOffset: 0)
+
+// encoder 命令记录完成后需要通过 endEncoding API 来关闭，重要！！！
+renderEncoder.endEncoding()
+
+// 从 MTKView 中获得窗口的 drawable，这是一个 CAMetalDrawable 内置类，用语言将绘制结果提交给显示设备
+guard let drawable = view.currentDrawable else {
+    fatalError()
+}
+
+commandBuffer.present(drawable)
+commandBuffer.commit()
+
+PlaygroundPage.current.liveView = view
