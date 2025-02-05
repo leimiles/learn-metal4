@@ -37,28 +37,46 @@ guard let commandQueue = device.makeCommandQueue() else {
 
 /*
  以上都属于初始化阶段，程序开始时执行；以下都属于执行阶段，每一帧都会执行一次，根据需要调整
- */
+*/
 
 // 通过文本定义一个 shader 源文件
 // 其中 [[attribute(0)]] 用于定义 vertex shader 输入属性的索引，本质上是一个地址索引，表示从第 0 个属性获取定点位置数据
-
 let shader = """
     #include <metal_stdlib>
     using namespace metal;
     struct VertexIn {
         float4 position [[attribute(0)]];
     };
-    vertex float4 vertex_main(const VertexIn vertex_in [[stage_in]])
+    vertex float4 vert(const VertexIn vertex_in [[stage_in]])
     {
         return vertex_in.position;
     }
-    fragment float4 fragment_main() 
+    fragment float4 frag() 
     {
         return float4(1, 0, 0, 1);
     }
     """
-let library = try device.makeLibrary(source: shader, options: nil)
-let vertexFunction = library.makeFunction(name: "vertex_main")
-let fragmentFunction = library.makeFunction(name: "fragment_main")
 
-print(shader)
+// 从文本中创建 vertex shader 和 fragment shader
+let library = try device.makeLibrary(source: shader, options: nil)
+let vertexFunction = library.makeFunction(name: "vert")
+let fragmentFunction = library.makeFunction(name: "frag")
+
+//print(shader)
+
+// 定义 pso descriptor 用于后面创建 pso 对象，包含默认的设置
+let pipelineDescriptor = MTLRenderPipelineDescriptor()
+// pixelformat 是 pso 中重要参数，需要手动指定，可以查看 mtlpixelformat 枚举的具体数值
+pipelineDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+// 另外两个重要的参数就是要指定
+pipelineDescriptor.vertexFunction = vertexFunction
+pipelineDescriptor.fragmentFunction = fragmentFunction
+
+// 定义 vertex layout，这样 gpu 才能正确读取顶点数据，由于我们是通过 modelI/O 生成的模型，所以布局很好获得
+pipelineDescriptor.vertexDescriptor = MTKMetalVertexDescriptorFromModelIO(
+    mesh.vertexDescriptor)
+
+// 通过 pipelineDescriptor 来生成 pso 对象，这一步的性能十分敏感
+let pipelineState = try device.makeRenderPipelineState(
+    descriptor: pipelineDescriptor)
+
