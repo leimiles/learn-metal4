@@ -16,7 +16,7 @@ let view = MTKView(frame: frame, device: device)
 view.clearColor = MTLClearColor(red: 1, green: 1, blue: 0.8, alpha: 1)
 
 // 将 view 赋予给 playground 的输出通道
-PlaygroundPage.current.liveView = view
+//PlaygroundPage.current.liveView = view
 
 // 定义一个 mesh buffer 内存分配器，需要 device
 let allocator = MTKMeshBufferAllocator(device: device)
@@ -53,7 +53,7 @@ let shader = """
     }
     fragment float4 frag() 
     {
-        return float4(1, 0, 0, 1);
+        return float4(0.3, 0.4, 0.5, 1);
     }
     """
 
@@ -115,7 +115,10 @@ guard let drawable = view.currentDrawable else {
     fatalError()
 }
 
+// commandbuffer 的内容提交到 drawable，提交到 drawable 就可以显示到屏幕
 commandBuffer.present(drawable)
+// 提交命令并执行
 commandBuffer.commit()
 
+// 将 MTKView 赋予 playground 以便显示出来
 PlaygroundPage.current.liveView = view
