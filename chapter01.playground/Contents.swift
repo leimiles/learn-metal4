@@ -9,7 +9,7 @@ guard let device = MTLCreateSystemDefaultDevice() else {
 print("device name: " + device.name)
 
 // 定义一个绘画区域 rect
-let frame = CGRect(x: 0, y: 0, width: 800, height: 600)
+let frame = CGRect(x: 0, y: 0, width: 512, height: 512)
 
 // 通过 rect 定义一个 view，并设置该 view 的 clear color
 let view = MTKView(frame: frame, device: device)
@@ -95,6 +95,8 @@ renderEncoder.setRenderPipelineState(pipelineState)
 
 // 设置 vertex buffer
 renderEncoder.setVertexBuffer(mesh.vertexBuffers[0].buffer, offset: 0, index: 0)
+
+renderEncoder.setTriangleFillMode(.lines)
 
 // 绘制命令需要顶点索引的数量与类型，这些信息通过 mesh 的 submesh 来提供
 guard let submesh = mesh.submeshes.first else {
