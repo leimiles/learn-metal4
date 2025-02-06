@@ -26,7 +26,7 @@ let mdlMesh = MDLMesh(
     coneWithExtent: [1, 1, 1], segments: [10, 10], inwardNormals: false,
     cap: true, geometryType: .triangles, allocator: allocator)
 
-// 将模型导出位 usda 格式的文件
+// 将模型导出位 usda 格式的文件，需要提前在 Documents 文件夹中创建一个 Shared Playground Data 文件夹
 let asset = MDLAsset()
 asset.add(mdlMesh)
 let fileExtension = "usda"
