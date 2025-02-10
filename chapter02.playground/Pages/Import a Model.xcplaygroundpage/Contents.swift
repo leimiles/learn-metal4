@@ -13,7 +13,7 @@ let frame = CGRect(x: 0, y: 0, width: 512, height: 512)
 
 // 通过 rect 定义一个 view，并设置该 view 的 clear color
 let view = MTKView(frame: frame, device: device)
-view.clearColor = MTLClearColor(red: 1, green: 1, blue: 0.8, alpha: 1)
+view.clearColor = MTLClearColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1)
 
 // 将 view 赋予给 playground 的输出通道
 //PlaygroundPage.current.liveView = view
@@ -62,6 +62,7 @@ guard let commandQueue = device.makeCommandQueue() else {
 
 // 通过文本定义一个 shader 源文件
 // 其中 [[attribute(0)]] 用于定义 vertex shader 输入属性的索引，本质上是一个地址索引，表示从第 0 个属性获取定点位置数据
+// 由于这里的顶点位置完全没有经过任何变换，所以默认情况下，顶点位置会被视为 NDC 空间位置
 let shader = """
     #include <metal_stdlib>
     using namespace metal;
@@ -70,11 +71,13 @@ let shader = """
     };
     vertex float4 vert(const VertexIn vertex_in [[stage_in]])
     {
-        return vertex_in.position;
+        float4 position = vertex_in.position;
+        position.y -= 1.0;
+        return position;
     }
     fragment float4 frag() 
     {
-        return float4(0.3, 0.4, 0.5, 1);
+        return float4(0.7, 0.4, 0.5, 1);
     }
     """
 
