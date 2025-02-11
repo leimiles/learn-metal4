@@ -123,15 +123,23 @@ renderEncoder.setVertexBuffer(mesh.vertexBuffers[0].buffer, offset: 0, index: 0)
 renderEncoder.setTriangleFillMode(.lines)
 
 // 绘制命令需要顶点索引的数量与类型，这些信息通过 mesh 的 submesh 来提供
-guard let submesh = mesh.submeshes.first else {
-    fatalError("submesh error")
-}
+//guard let submesh = mesh.submeshes.first else {
+//    fatalError("submesh error")
+//}
 
 // 向 render encoder 里记录一条绘制命令，同时记录绘制参数
-renderEncoder.drawIndexedPrimitives(
-    type: .triangle, indexCount: submesh.indexCount,
-    indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer,
-    indexBufferOffset: 0)
+//renderEncoder.drawIndexedPrimitives(
+//    type: .triangle, indexCount: submesh.indexCount,
+//    indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer,
+//    indexBufferOffset: 0)
+
+// 使用循环遍历，渲染所有 submesh
+for submesh in mesh.submeshes {
+    renderEncoder.drawIndexedPrimitives(
+        type: .triangle, indexCount: submesh.indexCount,
+        indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer,
+        indexBufferOffset: submesh.indexBuffer.offset)
+}
 
 // encoder 命令记录完成后需要通过 endEncoding API 来关闭，重要！！！
 renderEncoder.endEncoding()
